@@ -1,9 +1,14 @@
 const express = require('express');
-const app = express();
+const path = require('path');
 const port = 3000;
 
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 app.get('/', async function (req, res) {
-    res.send('Welcome to YelpCamp!')
+    res.render('index')
 })
 
 app.listen(port, () => {
