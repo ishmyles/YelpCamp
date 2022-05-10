@@ -1,14 +1,35 @@
-<% layout('layouts/boilerplate') -%> 
-    <h1>Add new Campground</h1>
-    <a href="/campgrounds/">Back to Campgrounds</a>
+<% layout('layouts/boilerplate') -%>
+<div class="row">
+  <h1 class="text-center">Add New Campground</h1>
+  <div class="col-6 offset-3">
     <form method="post" action="/campgrounds/new">
-        <div>
-            <label for="title">Title:</label>
-            <input type="text" id="title" name="campground[title]" placeholder="Camp Lazlo">
+      <div class="form-group mb-2">
+          <label for="title">Title:</label>
+          <input type="text" class="form-control" id="title" name="campground[title]" placeholder="Camp Lazlo">
+        </div>
+        <div class="form-group mb-2">
+          <label for="location">Location:</label>
+          <input type="text" class="form-control" id="location" name="campground[location]" placeholder="Los Angeles, California">
+        </div>
+        <div class="form-group mb-2">
+          <label for="description">Description:</label>
+          <textarea type="text" class="form-control" id="description" name="campground[description]" placeholder="Best camping ground we've been in, definitely a family fave!" rows="4"></textarea>
+        </div>
+        <div class="form-group mb-2">
+          <label for="price" class="form-label">Campground Price:</label>
+          <div class="input-group">
+            <span class="input-group-text" id="price-label">$</span>
+            <input type="text" class="form-control" id="price" placeholder="0.00" name="campground[price]" aria-label="price" aria-describedby="price-label">
           </div>
-          <div>
-            <label for="location">Location:</label>
-            <input type="text" id="location" name="campground[location]" placeholder="Los Angeles, California">
-          </div>
-          <button type="submit">Add</button>
+        </div>
+        <div class="form-group mb-2">
+          <label for="image">Image URL:</label>
+          <input type="text" class="form-control" id="image" name="campground[image]" placeholder="https://imagelink.com/example">
+        </div>
+        <div class="form-group mb-2">
+          <button type="submit" class="btn btn-success">Add Campground</button>
+          <a class="btn btn-danger" href="/campgrounds">Cancel</a>
+        </div>
     </form>
+  </div>
+</div>
