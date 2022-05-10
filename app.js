@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const engine = require('ejs-mate');
 const methodOverride = require('method-override');
 const Campground = require('./models/campground');
 const path = require('path');
@@ -17,6 +18,9 @@ db.once('open', () => {
 })
 
 const app = express();
+
+// Use ejs-locals for all ejs templates:
+app.engine('ejs', engine);
 
 // Application Settings
 app.set('view engine', 'ejs');
