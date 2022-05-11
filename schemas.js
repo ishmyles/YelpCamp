@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-module.exports = campgroundSchema = Joi.object({
+module.exports.campgroundSchema = Joi.object({
     campground: Joi.object({
         title: Joi.string().required(),
         image: Joi.string().required(),

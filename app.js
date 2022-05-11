@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
-const campgroundSchema = require('./schemas');
+const { campgroundSchema } = require('./schemas');
 const ExpressError = require('./utilities/ExpressError');
 const AsyncWrap = require('./utilities/AsyncWrap');
 const Campground = require('./models/campground');
@@ -37,7 +37,6 @@ app.use(methodOverride('_method')) // override methods using query string value
 
 const validateCampground = (req, res, next) => {
     const result = campgroundSchema.validate(req.body);
-    console.log(result.error)
     if (result.error) {
         throw new ExpressError(result.error, 400)
     } else {
