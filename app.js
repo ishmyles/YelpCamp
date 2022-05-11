@@ -28,6 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Mounting Express Middleware
 //app.use(express.json()) // for parsing application/json
+app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.use(methodOverride('_method')) // override methods using query string value
 
