@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
+const ExpressError = require('./utilities/ExpressError');
+const AsyncWrap = require('./utilities/AsyncWrap');
 const Campground = require('./models/campground');
 const path = require('path');
 const port = 3000;
@@ -38,56 +40,70 @@ app.get('/', async function (req, res) {
 });
 
 // GET Campgrounds
-app.get('/campgrounds', async function (req, res) {
+app.get('/campgrounds', AsyncWrap(async function (req, res) {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', {campgrounds});
-});
+}));
 
 // GET New Campground Form
-app.get('/campgrounds/new', async function (req, res) {
+app.get('/campgrounds/new', function (req, res) {
     res.render('campgrounds/new');
 });
 
 // POST New Campground
-app.post('/campgrounds/new', async function (req, res) {
+app.post('/campgrounds/new', AsyncWrap(async function (req, res) {
+    if (!req.body.campground) throw new ExpressError('Invalid Campground data', 400)
     const body = req.body.campground;
     const newCampground = new Campground(body);
     await newCampground.save();
     res.redirect(`/campgrounds/${newCampground._id}`)
-});
+}));
 
 // GET Campground by ID
 // Ensure that anything that uses a similar path to this, needs to be above this route (as this catches all).
 // As Express will scan the route from top to bottom, if routes that are similar to this end up below it & we access a route similar to this -
 // Express will take the that param as an 'ID' that will be used to query the mongoDB for data & will result in an error.
-app.get('/campgrounds/:id', async function (req, res) {
+app.get('/campgrounds/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const campground = await Campground.findById(id);
     res.render('campgrounds/show', {campground});
-});
+}));
 
 // DELETE Campground by ID
-app.delete('/campgrounds/:id', async function (req, res) {
+app.delete('/campgrounds/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     await Campground.findByIdAndRemove(id)
     res.redirect('/campgrounds')
-})
+}));
 
 // GET Edit Campground by ID
-app.get('/campgrounds/:id/edit', async function (req, res) {
+app.get('/campgrounds/:id/edit', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const campground = await Campground.findById(id);
     res.render('campgrounds/edit', {campground});
-});
+}));
 
 // PUT Edit Campground
-app.put('/campgrounds/:id/edit', async function (req, res) {
+app.put('/campgrounds/:id/edit', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const update = req.body.campground
     await Campground.findByIdAndUpdate(id, update);
     res.redirect(`/campgrounds/${id}`);
-});
+}));
 
+app.all('*', (req, res, next) =>
+    next(new ExpressError('Page Not Found', 404))
+)
+
+app.use((err, req, res, next) => {
+    if(err.name === 'ValidationError') err = new ExpressError("Incorrect Price", 400)
+    next(err)
+})
+
+app.use((err, req, res, next) => {
+    if (!err.message) err.message = 'Something Went Wrong'
+    res.status(err.status).render('error', {err})
+})
 
 app.listen(port, () => {
     console.log(`YelpCamp app now serving on port ${port}`);
