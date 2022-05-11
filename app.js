@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
+const campgroundSchema = require('./schemas');
 const ExpressError = require('./utilities/ExpressError');
 const AsyncWrap = require('./utilities/AsyncWrap');
 const Campground = require('./models/campground');
@@ -34,6 +35,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.use(methodOverride('_method')) // override methods using query string value
 
+const validateCampground = (req, res, next) => {
+    const result = campgroundSchema.validate(req.body);
+    console.log(result.error)
+    if (result.error) {
+        throw new ExpressError(result.error, 400)
+    } else {
+        next();
+    }
+}
+
 // ROUTES
 app.get('/', async function (req, res) {
     res.render('index');
@@ -51,10 +62,8 @@ app.get('/campgrounds/new', function (req, res) {
 });
 
 // POST New Campground
-app.post('/campgrounds/new', AsyncWrap(async function (req, res) {
-    if (!req.body.campground) throw new ExpressError('Invalid Campground data', 400)
-    const body = req.body.campground;
-    const newCampground = new Campground(body);
+app.post('/campgrounds/new', validateCampground, AsyncWrap(async function (req, res) {
+    const newCampground = new Campground(req.body.campground);
     await newCampground.save();
     res.redirect(`/campgrounds/${newCampground._id}`)
 }));
@@ -84,7 +93,7 @@ app.get('/campgrounds/:id/edit', AsyncWrap(async function (req, res) {
 }));
 
 // PUT Edit Campground
-app.put('/campgrounds/:id/edit', AsyncWrap(async function (req, res) {
+app.put('/campgrounds/:id/edit', validateCampground, AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const update = req.body.campground
     await Campground.findByIdAndUpdate(id, update);
@@ -101,8 +110,9 @@ app.use((err, req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+    const { statusCode = 500 } = err
     if (!err.message) err.message = 'Something Went Wrong'
-    res.status(err.status).render('error', {err})
+    res.status(statusCode).render('error', {err})
 })
 
 app.listen(port, () => {
