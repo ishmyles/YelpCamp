@@ -4,6 +4,7 @@ const Review = require('../models/review');
 const AsyncWrap = require('../utilities/AsyncWrap');
 const { reviewSchema } = require('../schemas');
 const ExpressError = require('../utilities/ExpressError');
+//const flash = require('connect-flash');
 const router = express.Router({ mergeParams: true }); // Ensures the params from the main app is also carried over to this req
 
 const validateReview = (req, res, next) => {
@@ -23,6 +24,7 @@ router.post('/', validateReview, AsyncWrap(async (req, res) => {
     campground.reviews.push(newReview);
     await newReview.save();
     await campground.save();
+    req.flash('success', 'Review has been posted!');
     res.redirect(`/campgrounds/${id}`);
 }))
 
@@ -31,6 +33,7 @@ router.delete('/:reviewId', AsyncWrap(async (req, res) => {
     const { id, reviewId } = req.params;
     await Campground.findByIdAndUpdate(id, { $pull: {reviews: reviewId} }); // Pulls review from the Campground.reviews array & updates the Campground document
     await Review.findByIdAndDelete(reviewId);
+    req.flash('success', 'Review has been deleted.');
     res.redirect(`/campgrounds/${id}`);
 }))
 

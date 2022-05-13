@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
+const session = require('express-session');
+const flash = require('connect-flash');
 const ExpressError = require('./utilities/ExpressError');
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
@@ -19,6 +21,17 @@ db.once('open', () => {
     console.log('Connected to Database');
 })
 
+const sessionConfig = {
+    secret: 'secret', // TODO: Change later for deployment
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true, // True by default
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // No expiry by default, so we need to set one
+        maxAge: 1000 * 60 * 60 * 24 * 7 // Multiplies the seconds to a week
+    }
+};
+
 const app = express();
 
 // Use ejs-locals for all ejs templates:
@@ -33,6 +46,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(methodOverride('_method')); // override methods using query string value
+app.use(session(sessionConfig));
+app.use(flash());
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
 // ROUTES
 app.get('/', async function (req, res) {

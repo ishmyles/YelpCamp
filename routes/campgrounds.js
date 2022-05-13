@@ -3,6 +3,7 @@ const Campground = require('../models/campground');
 const AsyncWrap = require('../utilities/AsyncWrap');
 const { campgroundSchema } = require('../schemas');
 const ExpressError = require('../utilities/ExpressError');
+//const flash = require('connect-flash');
 const router = express.Router();
 
 const validateCampground = (req, res, next) => {
@@ -29,7 +30,8 @@ router.get('/new', function (req, res) {
 router.post('/new', validateCampground, AsyncWrap(async function (req, res) {
     const newCampground = new Campground(req.body.campground);
     await newCampground.save();
-    res.redirect(`/campgrounds/${newCampground._id}`)
+    req.flash('success', `${newCampground.title} has been added!`);
+    res.redirect(`/campgrounds/${newCampground._id}`);
 }));
 
 // GET Campground by ID
@@ -39,6 +41,10 @@ router.post('/new', validateCampground, AsyncWrap(async function (req, res) {
 router.get('/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const campground = await Campground.findById(id).populate('reviews');
+    if (!campground) {
+        req.flash('error', 'Sorry, this campground no longer exists!');
+        return res.redirect('/campgrounds')
+    }
     res.render('campgrounds/show', {campground});
 }));
 
@@ -46,6 +52,7 @@ router.get('/:id', AsyncWrap(async function (req, res) {
 router.delete('/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     await Campground.findByIdAndDelete(id);
+    req.flash('success', 'Campground has been deleted.');
     res.redirect('/campgrounds');
 }));
 
@@ -53,6 +60,10 @@ router.delete('/:id', AsyncWrap(async function (req, res) {
 router.get('/:id/edit', AsyncWrap(async function (req, res) {
     const id = req.params.id;
     const campground = await Campground.findById(id);
+    if (!campground) {
+        req.flash('error', 'Sorry, this campground no longer exists!');
+        return res.redirect('/campgrounds')
+    }
     res.render('campgrounds/edit', {campground});
 }));
 
@@ -61,6 +72,7 @@ router.put('/:id/edit', validateCampground, AsyncWrap(async function (req, res) 
     const id = req.params.id;
     const update = req.body.campground
     await Campground.findByIdAndUpdate(id, update);
+    req.flash('success', 'Campground has been updated.');
     res.redirect(`/campgrounds/${id}`);
 }));
 
