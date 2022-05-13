@@ -2,11 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
-const { campgroundSchema } = require('./schemas');
+const { campgroundSchema, reviewSchema } = require('./schemas');
 const ExpressError = require('./utilities/ExpressError');
 const AsyncWrap = require('./utilities/AsyncWrap');
 const Campground = require('./models/campground');
+const Review = require('./models/review');
 const path = require('path');
+const { findByIdAndDelete } = require('./models/campground');
 const port = 3000;
 const dbUrl = 'mongodb://127.0.0.1:27017/yelpCamp';
 
@@ -31,12 +33,21 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Mounting Express Middleware
 //app.use(express.json()) // for parsing application/json
-app.use(express.static(path.join(__dirname, 'public')))
-app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
-app.use(methodOverride('_method')) // override methods using query string value
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(methodOverride('_method')); // override methods using query string value
 
 const validateCampground = (req, res, next) => {
     const result = campgroundSchema.validate(req.body);
+    if (result.error) {
+        throw new ExpressError(result.error, 400);
+    } else {
+        next();
+    }
+}
+
+const validateReview = (req, res, next) => {
+    const result = reviewSchema.validate(req.body);
     if (result.error) {
         throw new ExpressError(result.error, 400)
     } else {
@@ -73,15 +84,15 @@ app.post('/campgrounds/new', validateCampground, AsyncWrap(async function (req, 
 // Express will take the that param as an 'ID' that will be used to query the mongoDB for data & will result in an error.
 app.get('/campgrounds/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
-    const campground = await Campground.findById(id);
+    const campground = await Campground.findById(id).populate('reviews');
     res.render('campgrounds/show', {campground});
 }));
 
 // DELETE Campground by ID
 app.delete('/campgrounds/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
-    await Campground.findByIdAndRemove(id)
-    res.redirect('/campgrounds')
+    await Campground.findByIdAndDelete(id);
+    res.redirect('/campgrounds');
 }));
 
 // GET Edit Campground by ID
@@ -99,20 +110,39 @@ app.put('/campgrounds/:id/edit', validateCampground, AsyncWrap(async function (r
     res.redirect(`/campgrounds/${id}`);
 }));
 
+// POST New Campground Review
+app.post('/campgrounds/:id/reviews', validateReview, AsyncWrap(async (req, res) => {
+    const id = req.params.id;
+    const campground = await Campground.findById(id);
+    const newReview = new Review(req.body.review);
+    campground.reviews.push(newReview);
+    await newReview.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${id}`);
+}))
+
+// DELETE Camp Review by ID
+app.delete('/campgrounds/:id/reviews/:reviewId', AsyncWrap(async (req, res) => {
+    const { id, reviewId } = req.params;
+    await Campground.findByIdAndUpdate(id, { $pull: {reviews: reviewId} });
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/campgrounds/${id}`);
+}))
+
 app.all('*', (req, res, next) =>
     next(new ExpressError('Page Not Found', 404))
-)
+);
 
 app.use((err, req, res, next) => {
-    if(err.name === 'ValidationError') err = new ExpressError("Incorrect Price", 400)
-    next(err)
-})
+    if(err.name === 'ValidationError') err = new ExpressError("Incorrect Price", 400);
+    next(err);
+});
 
 app.use((err, req, res, next) => {
-    const { statusCode = 500 } = err
-    if (!err.message) err.message = 'Something Went Wrong'
-    res.status(statusCode).render('error', {err})
-})
+    const { statusCode = 500 } = err;
+    if (!err.message) err.message = 'Something Went Wrong';
+    res.status(statusCode).render('error', {err});
+});
 
 app.listen(port, () => {
     console.log(`YelpCamp app now serving on port ${port}`);
