@@ -2,13 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
-const { campgroundSchema, reviewSchema } = require('./schemas');
 const ExpressError = require('./utilities/ExpressError');
-const AsyncWrap = require('./utilities/AsyncWrap');
-const Campground = require('./models/campground');
-const Review = require('./models/review');
+const campgrounds = require('./routes/campgrounds');
+const reviews = require('./routes/reviews');
 const path = require('path');
-const { findByIdAndDelete } = require('./models/campground');
 const port = 3000;
 const dbUrl = 'mongodb://127.0.0.1:27017/yelpCamp';
 
@@ -37,97 +34,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(methodOverride('_method')); // override methods using query string value
 
-const validateCampground = (req, res, next) => {
-    const result = campgroundSchema.validate(req.body);
-    if (result.error) {
-        throw new ExpressError(result.error, 400);
-    } else {
-        next();
-    }
-}
-
-const validateReview = (req, res, next) => {
-    const result = reviewSchema.validate(req.body);
-    if (result.error) {
-        throw new ExpressError(result.error, 400)
-    } else {
-        next();
-    }
-}
-
 // ROUTES
 app.get('/', async function (req, res) {
     res.render('index');
 });
 
-// GET Campgrounds
-app.get('/campgrounds', AsyncWrap(async function (req, res) {
-    const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', {campgrounds});
-}));
-
-// GET New Campground Form
-app.get('/campgrounds/new', function (req, res) {
-    res.render('campgrounds/new');
-});
-
-// POST New Campground
-app.post('/campgrounds/new', validateCampground, AsyncWrap(async function (req, res) {
-    const newCampground = new Campground(req.body.campground);
-    await newCampground.save();
-    res.redirect(`/campgrounds/${newCampground._id}`)
-}));
-
-// GET Campground by ID
-// Ensure that anything that uses a similar path to this, needs to be above this route (as this catches all).
-// As Express will scan the route from top to bottom, if routes that are similar to this end up below it & we access a route similar to this -
-// Express will take the that param as an 'ID' that will be used to query the mongoDB for data & will result in an error.
-app.get('/campgrounds/:id', AsyncWrap(async function (req, res) {
-    const id = req.params.id;
-    const campground = await Campground.findById(id).populate('reviews');
-    res.render('campgrounds/show', {campground});
-}));
-
-// DELETE Campground by ID
-app.delete('/campgrounds/:id', AsyncWrap(async function (req, res) {
-    const id = req.params.id;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}));
-
-// GET Edit Campground by ID
-app.get('/campgrounds/:id/edit', AsyncWrap(async function (req, res) {
-    const id = req.params.id;
-    const campground = await Campground.findById(id);
-    res.render('campgrounds/edit', {campground});
-}));
-
-// PUT Edit Campground
-app.put('/campgrounds/:id/edit', validateCampground, AsyncWrap(async function (req, res) {
-    const id = req.params.id;
-    const update = req.body.campground
-    await Campground.findByIdAndUpdate(id, update);
-    res.redirect(`/campgrounds/${id}`);
-}));
-
-// POST New Campground Review
-app.post('/campgrounds/:id/reviews', validateReview, AsyncWrap(async (req, res) => {
-    const id = req.params.id;
-    const campground = await Campground.findById(id);
-    const newReview = new Review(req.body.review);
-    campground.reviews.push(newReview);
-    await newReview.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${id}`);
-}))
-
-// DELETE Camp Review by ID
-app.delete('/campgrounds/:id/reviews/:reviewId', AsyncWrap(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, { $pull: {reviews: reviewId} });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}))
+// Express will run the request to specified route
+app.use('/campgrounds', campgrounds);
+app.use('/campgrounds/:id/reviews/', reviews); // One way to bring params to the router is by adding a property in the req object, however we use the option in Router to merge params
 
 app.all('*', (req, res, next) =>
     next(new ExpressError('Page Not Found', 404))
