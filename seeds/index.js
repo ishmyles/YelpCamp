@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Campground = require('../models/campground');
+const Review = require('../models/review');
 const cities = require('./cities');
 const { descriptors, places } = require('./seedHelpers');
 const dbUrl = 'mongodb://127.0.0.1:27017/yelpCamp';
@@ -19,17 +20,24 @@ const randomTitle = (arr) => arr[Math.floor(Math.random() * arr.length)];
 // The method will then loop to add/save new Campground data through the seedHelpers & cities files.
 const seedData = async () => {
     await Campground.deleteMany({});
+    await Review.deleteMany({});
     for (let i = 0; i < 50; i++) {
         const randomNum = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() * 20) + 10;
+        const review = new Review({
+            body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur!", 
+            rating: 5
+        });
         const newCamp = new Campground({
             location: `${cities[randomNum].city}, ${cities[randomNum].state}`,
             title: `${randomTitle(descriptors)} ${randomTitle(places)}`,
             image: 'https://source.unsplash.com/collection/483251', // Randomizes tan image from the collection
             price: price,
-            description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum."
-        })
+            description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum.",
+            reviews: [review]
+        });
         await newCamp.save();
+        await review.save();
     }
     console.log('Data added to Database.')
 };
