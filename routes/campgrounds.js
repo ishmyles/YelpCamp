@@ -40,7 +40,9 @@ router.post('/new', loginRequired, validateCampground, AsyncWrap(async function 
 // Express will take the that param as an 'ID' that will be used to query the mongoDB for data & will result in an error.
 router.get('/:id', AsyncWrap(async function (req, res) {
     const id = req.params.id;
-    const campground = await Campground.findById(id).populate('reviews');
+    const campground = await Campground.findById(id)
+        .populate({ path: 'reviews', populate: { path: 'author'}})
+        .populate('author');
     if (!campground) {
         req.flash('error', 'Sorry, this campground no longer exists!');
         return res.redirect('/campgrounds')

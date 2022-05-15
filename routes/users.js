@@ -6,7 +6,6 @@ const router = express.Router({ mergeParams: true });
 
 // GET Login Form
 router.get('/login', (req, res) => {
-    console.log(req.originalUrl)
     res.render('auth/login', { user: req.user });
 })
 
