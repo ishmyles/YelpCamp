@@ -63,7 +63,7 @@
                 <div class="card-body">
                     <h3 class="card-title">Rating: <%= review.rating %></h3>
                     <p class="card-text">"<%= review.body %>" - <span class="text-muted"><b><%= review.author.username %></b></span></p>
-                    <% if (currentUser && currentUser.equals(campground.author._id)) { %> 
+                    <% if (currentUser && currentUser.equals(review.author._id)) { %> 
                     <form action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
                         <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                     </form>

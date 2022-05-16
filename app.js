@@ -1,18 +1,24 @@
-// Require modules/files
+// Require modules
 const express = require('express');
 const mongoose = require('mongoose');
 const engine = require('ejs-mate');
 const methodOverride = require('method-override');
 const session = require('express-session');
+const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const flash = require('connect-flash');
+const path = require('path');
+
+// Require files
 const ExpressError = require('./utilities/ExpressError');
+const User = require('./models/user');
+
+// Require route files
 const users = require('./routes/users');
 const campgrounds = require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
-const User = require('./models/user');
-const path = require('path');
+
+// Set port & dbUrl
 const port = 3000;
 const dbUrl = 'mongodb://127.0.0.1:27017/yelpCamp';
 
@@ -26,6 +32,7 @@ db.once('open', () => {
     console.log('Connected to Database');
 })
 
+// Set session config
 const sessionConfig = {
     secret: 'secret', // TODO: Change later for deployment
     resave: false,
@@ -67,7 +74,8 @@ app.use((req, res, next) => {
     if (!['/login', '/'].includes(req.originalUrl)) {
         req.session.returnTo = req.originalUrl;
     }
-    res.locals.currentUser = req.user;
+    // Create local variables to be rendered with ejs
+    res.locals.currentUser = req.user; 
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
     next();
