@@ -30,15 +30,21 @@
         <div class="mb-4">
             <h2>Leave a review</h2>
             <form class="needs-validation" method="post" action="/campgrounds/<%= campground._id %>/reviews" novalidate>
-                <div class="form-group mb-2">
-                    <label for="rating" class="form-label">Rating:</label>
-                    <input type="range" class="form-range" id="rating" name="review[rating]" min="1" max="5">
-                    <div class="valid-feedback">
-                    Looks good.
-                    </div>
-                    <div class="invalid-feedback">
-                    Please enter a rating.
-                    </div>
+                <div class="form-group">
+                    <fieldset class="starability-basic">
+                        <!--TODO: Work on client-side validation so user cannot input a value of '0'-->
+                        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating." required/> 
+                        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                        <label for="first-rate1" title="Terrible">1 star</label>
+                        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                        <label for="first-rate2" title="Not good">2 stars</label>
+                        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                        <label for="first-rate3" title="Average">3 stars</label>
+                        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                        <label for="first-rate4" title="Very good">4 stars</label>
+                        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                        <label for="first-rate5" title="Amazing">5 stars</label>
+                    </fieldset>
                 </div>
                 <div class="form-group mb-2">
                     <label for="body" class="form-label">Review:</label>
@@ -61,8 +67,11 @@
             <% for( let review of campground.reviews) { %>
             <div class="card mb-3">
                 <div class="card-body">
-                    <h3 class="card-title">Rating: <%= review.rating %></h3>
-                    <p class="card-text">"<%= review.body %>" - <span class="text-muted"><b><%= review.author.username %></b></span></p>
+                    <p class="card-title"><span class="text-muted h5"><b><%= review.author.username %></b></span></p>
+                    <p class="starability-result" data-rating="<%= review.rating %>">
+                        Rated: <%= review.rating %>  stars
+                    </p>
+                    <p class="card-text"><%= review.body %></p>
                     <% if (currentUser && currentUser.equals(review.author._id)) { %> 
                     <form action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE" method="post">
                         <button type="submit" class="btn btn-sm btn-danger">Delete</button>
