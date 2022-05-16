@@ -25,6 +25,7 @@ const seedData = async () => {
         const randomNum = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() * 20) + 10;
         const review = new Review({
+            author: '62811397debff6867153f5dc', // Need to change this if you recreate user db
             body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur!", 
             rating: 5
         });
@@ -34,6 +35,7 @@ const seedData = async () => {
             image: 'https://source.unsplash.com/collection/483251', // Randomizes tan image from the collection
             price: price,
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum.",
+            author: '62811397debff6867153f5dc', // Need to change this if you recreate user db
             reviews: [review]
         });
         await newCamp.save();
