@@ -63,3 +63,5 @@ module.exports.isReviewAuthor = async (req, res, next) => {
     }
 };
 
+// This middleware is run before logging out. It handles when a user that hasn't been authenticated to never run the method users.logoutUser
+module.exports.isUserAuthenticated = (req, res, next) => { return (!req.isAuthenticated()) ? res.redirect('/campgrounds') : next() }
