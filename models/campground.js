@@ -8,6 +8,7 @@ const ImageSchema = new Schema({
 });
 
 //TODO: Virtual Property for smaller images
+ImageSchema.virtual('thumbnail').get(function() { return this.imageUrl.replace('upload/', 'upload/c_thumb,h_75,w_75/')});
 
 const CampgroundSchema = new Schema({
     title: String,
@@ -36,6 +37,6 @@ CampgroundSchema.post('findOneAndDelete', async function(doc) {
             }
         );
     }
-})
+});
 
 module.exports = mongoose.model('Campground', CampgroundSchema);

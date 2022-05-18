@@ -1,4 +1,5 @@
 const Campground = require('../models/campground');
+const { cloudinary } = require('../config/index'); 
 
 // GET Campgrounds
 module.exports.index = async function (req, res) {
@@ -36,6 +37,11 @@ module.exports.getCampground = async function (req, res) {
 // DELETE Campground by ID
 module.exports.deleteCampground = async function (req, res) {
     const id = req.params.id;
+    const camp = await Campground.findById(id);
+    const imgsToDelete = camp.image.map(img => img.filename);
+    for (let img of imgsToDelete) {
+        await cloudinary.uploader.destroy(img);
+    }
     await Campground.findByIdAndDelete(id);
     req.flash('success', 'Campground has been deleted.');
     res.redirect('/campgrounds');
@@ -57,16 +63,22 @@ module.exports.updateCampground = async function (req, res) {
     const id = req.params.id;
     const update = req.body.campground;
     const camp = await Campground.findByIdAndUpdate(id, update);
+    const deletedImgs = req.body.deleteImgs;
     if (!camp) {
         req.flash('error', 'Sorry, we are having trouble finding this campground!');
         return res.redirect('/campgrounds')
     }
-    console.log(req.files);
     if (req.files) {
         const newImgs = req.files.map(img => { return { filename: img.filename , imageUrl: img.path } });
         camp.image.push(...newImgs);
     }
     await camp.save();
+    if (deletedImgs) {
+        for (let filename of deletedImgs) { // Foreach not supported with async/await
+            await cloudinary.uploader.destroy(filename);
+        }
+        await camp.updateOne({ $pull: { image: { filename: { $in: deletedImgs } } } });
+    }
     req.flash('success', 'Campground has been updated.');
     res.redirect(`/campgrounds/${id}`);
 };
