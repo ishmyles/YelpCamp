@@ -32,11 +32,19 @@ const seedData = async () => {
         const newCamp = new Campground({
             location: `${cities[randomNum].city}, ${cities[randomNum].state}`,
             title: `${randomTitle(descriptors)} ${randomTitle(places)}`,
-            image: 'https://source.unsplash.com/collection/483251', // Randomizes tan image from the collection
             price: price,
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum.",
             author: '62811397debff6867153f5dc', // Need to change this if you recreate user db
-            reviews: [review]
+            reviews: [review],
+            image: [ // Need to change this if you delete these files in cloudinary
+                {
+                    filename: 'YelpCamp/fynpghad3ihsz4nykdrw', 
+                    imageUrl: 'https://res.cloudinary.com/dm3d5xbas/image/upload/v1652866631/YelpCamp/fynpghad3ihsz4nykdrw.jpg'
+                },
+                {
+                    filename: 'YelpCamp/ho68uvawahknvvubildo',
+                    imageUrl: 'https://res.cloudinary.com/dm3d5xbas/image/upload/v1652869513/YelpCamp/ho68uvawahknvvubildo.jpg'
+                }]
         });
         await newCamp.save();
         await review.save();
