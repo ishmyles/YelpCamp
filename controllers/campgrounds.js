@@ -55,8 +55,18 @@ module.exports.getUpdateCampForm = async function (req, res) {
 // PUT Edit Campground
 module.exports.updateCampground = async function (req, res) {
     const id = req.params.id;
-    const update = req.body.campground
-    await Campground.findByIdAndUpdate(id, update);
+    const update = req.body.campground;
+    const camp = await Campground.findByIdAndUpdate(id, update);
+    if (!camp) {
+        req.flash('error', 'Sorry, we are having trouble finding this campground!');
+        return res.redirect('/campgrounds')
+    }
+    console.log(req.files);
+    if (req.files) {
+        const newImgs = req.files.map(img => { return { filename: img.filename , imageUrl: img.path } });
+        camp.image.push(...newImgs);
+    }
+    await camp.save();
     req.flash('success', 'Campground has been updated.');
     res.redirect(`/campgrounds/${id}`);
 };

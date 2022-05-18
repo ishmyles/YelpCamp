@@ -24,6 +24,6 @@ router.route('/:id')
 router.route('/:id/edit')
     .all(loginRequired, isCampAuthor)
     .get(AsyncWrap(campgrounds.getUpdateCampForm))
-    .put(validateCampground, AsyncWrap(campgrounds.updateCampground));
+    .put(upload.array('campground[image]'), validateCampground, AsyncWrap(campgrounds.updateCampground));
 
 module.exports = router;
