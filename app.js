@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+    require("dotenv").config();
+}
+
 // Require modules
 const express = require('express');
 const mongoose = require('mongoose');
@@ -71,7 +75,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser()); 
 
 app.use((req, res, next) => {
-    if (!['/login', '/'].includes(req.originalUrl)) {
+    if (!['/login', '/', '/register'].includes(req.originalUrl)) {
         req.session.returnTo = req.originalUrl;
     }
     // Create local variables to be rendered with ejs
