@@ -63,5 +63,12 @@ module.exports.isReviewAuthor = async (req, res, next) => {
     }
 };
 
+// Adds the image links returned from multer.array to the req.body.campground.images
+module.exports.addImageLinks = (req, res, next) => {
+    const images = req.files.map(e => { return { filename: e.filename, imageUrl: e.path }});
+    req.body.campground.image = images;
+    next();
+}
+
 // This middleware is run before logging out. It handles when a user that hasn't been authenticated to never run the method users.logoutUser
 module.exports.isUserAuthenticated = (req, res, next) => { return (!req.isAuthenticated()) ? res.redirect('/campgrounds') : next() }

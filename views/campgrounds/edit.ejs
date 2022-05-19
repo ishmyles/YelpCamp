@@ -2,7 +2,7 @@
 <div class="row">
   <h1 class="text-center">Edit Campground</h1>
   <div class="col-6 offset-3">
-    <form class="needs-validation" method="post" action="/campgrounds/<%= campground._id %>/edit?_method=put" novalidate>
+    <form class="needs-validation" method="post" action="/campgrounds/<%= campground._id %>/edit?_method=put" enctype="multipart/form-data" novalidate>
       <div class="form-group mb-2">
         <label for="title">Title:</label>
         <input type="text" class="form-control" id="title" name="campground[title]" value="<%= campground.title %>" required>
@@ -44,13 +44,24 @@
         </div>
       </div>
       <div class="form-group mb-2">
-        <label for="image">Image URL:</label>
-        <input type="text" class="form-control" id="image" name="campground[image]" value="<%= campground.image %>" required>
+        <label for="image">Add additional images:</label>
+        <input type="file" class="form-control" id="image" name="campground[image]" multiple/>
         <div class="valid-feedback">
           Looks good.
         </div>
         <div class="invalid-feedback">
           Please enter image link of campground.
+        </div>
+      </div>
+      <div class="form-group mb-2">
+        <label for="">Select images to remove:</label>
+        <div class="d-flex justify-content-between w-75">
+          <% campground.image.forEach((img, i) => { %>
+            <div class="form-check p-0">
+              <label for="img-<%= i %>"><img src="<%= img.thumbnail %>" alt=""></label>
+              <input class="form-check-input position-relative top-10 start-50" type="checkbox" name="deleteImgs[]" value="<%= img.filename %>" id="img-<%= i %>">
+            </div>
+          <% }) %> 
         </div>
       </div>
       <div class="form-group mb-2">
