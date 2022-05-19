@@ -31,6 +31,10 @@ const seedData = async () => {
         });
         const newCamp = new Campground({
             location: `${cities[randomNum].city}, ${cities[randomNum].state}`,
+            geometry: {
+                type: "Point",
+                coordinates: [cities[randomNum].longitude, cities[randomNum].latitude]
+            },
             title: `${randomTitle(descriptors)} ${randomTitle(places)}`,
             price: price,
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum.",
