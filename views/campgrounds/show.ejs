@@ -1,4 +1,4 @@
-<% layout('layouts/boilerplate') -%> 
+<% layout('layouts/campground') -%> <!-- Links to 'campground' boilerplate since we're using separate map styles for '/campgrounds' & '/'show' -->
 <div class="row mb-3">
     <div class="col-6">
         <div class="card mb-4">
@@ -42,6 +42,7 @@
         </div>
     </div>
     <div class="col-6 mb-4">
+        <div id='map'></div>
         <% if (currentUser) {%>
         <div class="mb-4">
             <h2>Leave a review</h2>
@@ -100,3 +101,8 @@
     </div>
 </div>
 <script src="/static/js/formValidation.js"></script>
+<script>
+    const mapboxToken = "<%- process.env.MAPBOX_TOKEN %>";
+    const geoData = <%-JSON.stringify(campground.geometry.coordinates)%>;
+</script>
+<script src="/static/js/mapbox.js"></script>
