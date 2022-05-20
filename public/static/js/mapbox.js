@@ -1,7 +1,7 @@
 mapboxgl.accessToken = mapboxToken;
 const map = new mapboxgl.Map({
     container: 'map', // container ID
-    style: 'mapbox://styles/mapbox/light-v10', // style URL
+    style: 'mapbox://styles/mapbox/dark-v10', // style URL
     center: geoData, // starting position [lng, lat]
     zoom: 9 // starting zoom
 });
