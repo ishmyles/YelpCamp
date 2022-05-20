@@ -1,4 +1,5 @@
-<% layout('layouts/boilerplate') -%> 
+<% layout('layouts/campgrounds') -%> 
+<div id="map" class="mb-3"></div>
 <h1>Campgrounds</h1>
 <a href="/campgrounds/new">Add New Campground</a>
     <% for(let camp of campgrounds) { %>
@@ -23,3 +24,8 @@
             </div>
         </div>
     <% } %>
+    <script>
+        const mapboxToken = "<%- process.env.MAPBOX_TOKEN %>";
+        const geoData = <%- JSON.stringify(campgrounds.map(e => { return { geometry: e.geometry, properties: { mapPopup: e.mapPopup } } }))%>
+    </script>
+    <script src="/static/js/mapboxcluster.js"></script>
