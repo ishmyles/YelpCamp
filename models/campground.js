@@ -15,6 +15,17 @@ const CampgroundSchema = new Schema({
     price: Number,
     description: String,
     location: String,
+    geometry: {
+        type: {
+            type: String, 
+            enum: ['Point'], // 'location.type' must be 'Point'
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
     author: { 
         type: Schema.Types.ObjectId, 
         ref: 'User' 
@@ -27,6 +38,8 @@ const CampgroundSchema = new Schema({
     ],
     image: [ImageSchema]
 });
+
+CampgroundSchema.virtual('mapPopup').get(function() { return `<a href="/campgrounds/${this._id}"><h6>${this.title}</h6></a><p>${this.location}</p>` });
 
 // POST HOOK function to delete the reviews associated with the particular campground
 CampgroundSchema.post('findOneAndDelete', async function(doc) {

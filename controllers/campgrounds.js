@@ -1,5 +1,10 @@
 const Campground = require('../models/campground');
-const { cloudinary } = require('../config/index'); 
+const { cloudinary } = require('../config/index');
+const mbxClient = require('@mapbox/mapbox-sdk');
+const mbxGeo = require('@mapbox/mapbox-sdk/services/geocoding');
+const mapboxClient = mbxClient({ accessToken: process.env.MAPBOX_TOKEN}); 
+const geoClient = mbxGeo(mapboxClient);
+
 
 // GET Campgrounds
 module.exports.index = async function (req, res) {
@@ -15,6 +20,16 @@ module.exports.renderNewCampForm = function (req, res) {
 // POST New Campground
 module.exports.createNewCampground = async function (req, res) {
     const newCampground = new Campground(req.body.campground);
+    const geodata = await geoClient.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send();
+    if (!geodata.body.features[0]) {
+        req.flash('error', `Unable to find location: ${req.body.campground.location}.`)
+        return res.redirect('/campgrounds/new');
+    }
+    newCampground.geometry = geodata.body.features[0].geometry;
+    newCampground.location = geodata.body.features[0].place_name;
     newCampground.author = req.user._id;
     await newCampground.save();
     req.flash('success', `${newCampground.title} has been added!`);

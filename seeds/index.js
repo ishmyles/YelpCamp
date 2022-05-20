@@ -21,7 +21,7 @@ const randomTitle = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const seedData = async () => {
     await Campground.deleteMany({});
     await Review.deleteMany({});
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 200; i++) {
         const randomNum = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() * 20) + 10;
         const review = new Review({
@@ -31,6 +31,10 @@ const seedData = async () => {
         });
         const newCamp = new Campground({
             location: `${cities[randomNum].city}, ${cities[randomNum].state}`,
+            geometry: {
+                type: "Point",
+                coordinates: [cities[randomNum].longitude, cities[randomNum].latitude]
+            },
             title: `${randomTitle(descriptors)} ${randomTitle(places)}`,
             price: price,
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Illo architecto repudiandae debitis adipisci cupiditate pariatur rerum laudantium consequuntur, reprehenderit asperiores provident, omnis velit repellat eveniet laborum corrupti id sapiente dolorum.",

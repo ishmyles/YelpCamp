@@ -1,11 +1,12 @@
-<% layout('layouts/boilerplate') -%> 
+<% layout('layouts/campgrounds') -%> 
+<div id="map" class="mb-3"></div>
 <h1>Campgrounds</h1>
 <a href="/campgrounds/new">Add New Campground</a>
     <% for(let camp of campgrounds) { %>
         <div class="card mb-3">
             <div class="row">
                 <div class="col-md-4">
-                    <img class="card-img" src="<%= camp.image[0].imageUrl %>" alt="Campground Image">
+                    <img class="card-img" src="<%= (camp.image.length < 1) ? 'https://res.cloudinary.com/dm3d5xbas/image/upload/v1652981675/YelpCamp/gxdbwfg8wqg7fiepyqlw.jpg' : camp.image[0].imageUrl %>" alt="Campground Image">
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">
@@ -23,3 +24,8 @@
             </div>
         </div>
     <% } %>
+    <script>
+        const mapboxToken = "<%- process.env.MAPBOX_TOKEN %>";
+        const geoData = <%- JSON.stringify(campgrounds.map(e => { return { geometry: e.geometry, properties: { mapPopup: e.mapPopup } } }))%>
+    </script>
+    <script src="/static/js/mapboxcluster.js"></script>
