@@ -103,6 +103,8 @@
 <script src="/static/js/formValidation.js"></script>
 <script>
     const mapboxToken = "<%- process.env.MAPBOX_TOKEN %>";
-    const geoData = <%-JSON.stringify(campground.geometry.coordinates)%>;
+    const geoData = <%- JSON.stringify(campground.geometry.coordinates) %>;
+    const camp = <%- JSON.stringify(campground.title) %>;
+    const campLocation = <%- JSON.stringify(campground.location) %>;
 </script>
 <script src="/static/js/mapbox.js"></script>
