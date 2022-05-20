@@ -4,7 +4,7 @@ const map = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/dark-v10', // style URL
     center: geoData, // starting position [lng, lat]
     zoom: 9 // starting zoom
-});
+}).addControl(new mapboxgl.NavigationControl());
 
 const popup = new mapboxgl.Popup()
     .setHTML(`<h5>${camp}</h5><p>${campLocation}</p>`);
