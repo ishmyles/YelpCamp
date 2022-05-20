@@ -21,7 +21,7 @@ const randomTitle = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const seedData = async () => {
     await Campground.deleteMany({});
     await Review.deleteMany({});
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 200; i++) {
         const randomNum = Math.floor(Math.random() * 1000);
         const price = Math.floor(Math.random() * 20) + 10;
         const review = new Review({
